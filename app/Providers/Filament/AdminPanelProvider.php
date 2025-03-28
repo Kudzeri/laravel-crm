@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Widgets\MetalPricesChart;
+use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use App\Filament\Resources\ProductResource\Widgets\ProductsByCategoryChart;
 use App\Filament\Resources\ProductResource\Widgets\ProductsCountStats;
 use Filament\Http\Middleware\Authenticate;
@@ -25,6 +27,7 @@ class AdminPanelProvider extends PanelProvider
     public function panel(Panel $panel): Panel
     {
         return $panel
+            ->favicon('https://icons.veryicon.com/png/o/miscellaneous/xingyuan-x-3-icon-library/crm-3.png')
             ->default()
             ->id('admin')
             ->path('admin')
@@ -41,6 +44,10 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 ProductsByCategoryChart::class,
                 ProductsCountStats::class,
+                MetalPricesChart::class,
+            ])
+            ->plugins([
+                FilamentApexChartsPlugin::make(),
             ])
             ->middleware([
                 EncryptCookies::class,
