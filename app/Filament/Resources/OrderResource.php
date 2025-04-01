@@ -52,27 +52,25 @@ class OrderResource extends Resource
                             ->required(),
                     ])
                     ->columns(2)
-                    ->required(),
+                    ->required()
+                    ->afterStateUpdated(function (callable $set, $state) {
+                        $total = OrderResource::calculateTotal($state);
+                        $set('total_price', $total);
+                    })
+                    ->afterStateHydrated(function (callable $set, $state) {
+                        $total = OrderResource::calculateTotal($state);
+                        $set('total_price', $total);
+                    }),
+
 
                 TextInput::make('total_price')
                     ->label('Bendra kaina')
                     ->disabled()
-                    ->dehydrated(), // сохраняем в БД
+                    ->dehydrated() // чтобы сохранялось в БД
+                    ->numeric(),
             ])
             ->columns(1)
-            ->statePath('data')
-            ->afterStateHydrated(function ($form, $state) {
-                // Автозаполнить цену
-                $form->fill([
-                    'total_price' => self::calculateTotal($state['products'] ?? [])
-                ]);
-            })
-            ->afterStateUpdated(function ($form, $state) {
-                // Перерасчёт при изменении товаров/количества
-                $form->fill([
-                    'total_price' => self::calculateTotal($state['products'] ?? [])
-                ]);
-            });
+            ->statePath('data');
     }
 
     public static function calculateTotal(array $products): float
