@@ -1,7 +1,7 @@
 <x-filament::widget>
     <x-filament::card>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
-            <div class="bg-gray-100 p-4 rounded-xl">
+            <div class="p-4 rounded-xl">
                 <h2 class="text-lg font-semibold">📦 Užsakymai per savaitę</h2>
                 <p class="text-2xl">{{ $weeklyOrders }}</p>
             </div>
