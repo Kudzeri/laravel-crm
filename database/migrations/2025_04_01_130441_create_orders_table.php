@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('car_number');
+            $table->string('car_number')->nullable();
             $table->decimal('total_price', 10, 2);
-            $table->string('status');
+            $table->string('status')->default('awaiting_payment');
             $table->string('image')->nullable();
             $table->timestamps();
         });
