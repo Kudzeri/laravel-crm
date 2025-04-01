@@ -85,8 +85,12 @@ class OrderResource extends Resource
             ->statePath('data');
     }
 
-    public static function calculateTotal(array $products): float
+    public static function calculateTotal(?array $products): float
     {
+        if (empty($products)) {
+            return 0;
+        }
+
         $ids = collect($products)->pluck('product_id')->unique();
         $prices = Product::whereIn('id', $ids)->pluck('price', 'id');
 
@@ -95,6 +99,7 @@ class OrderResource extends Resource
             return $carry + ($price * ($item['quantity'] ?? 1));
         }, 0);
     }
+
 
     public static function table(Table $table): Table
     {
