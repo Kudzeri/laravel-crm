@@ -10,6 +10,8 @@ use Filament\Forms\Form;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Pages\Actions\Action;
+use Filament\Pages\Actions\EditAction;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
@@ -119,6 +121,46 @@ class OrderResource extends Resource
                     }),
                 Tables\Columns\ImageColumn::make('image')->label('Vaizdas'),
                 Tables\Columns\TextColumn::make('created_at')->label('Sukurta')->dateTime()->sortable(),
+            ])
+            ->actions([
+                Action::make('view')
+                    ->label('Peržiūrėti')
+                    ->icon('heroicon-o-eye')
+                    ->modalHeading('Užsakymo informacija')
+                    ->modalButton('Uždaryti')
+                    ->modalSubmitAction(false)
+                    ->form(fn (Order $record) => [
+                        TextInput::make('car_number')
+                            ->label('Mašinos numeris')
+                            ->default($record->car_number)
+                            ->disabled(),
+
+                        TextInput::make('status')
+                            ->label('Statusas')
+                            ->default(match ($record->status) {
+                                'awaiting_payment' => 'Laukia apmokėjimo',
+                                'awaiting_shipment' => 'Laukia išsiuntimo',
+                                'shipped' => 'Išsiųstas',
+                                'completed' => 'Įvykdytas',
+                                default => $record->status,
+                            })
+                            ->disabled(),
+
+                        TextInput::make('total_price')
+                            ->label('Bendra kaina')
+                            ->default($record->total_price)
+                            ->disabled(),
+
+                        Select::make('products')
+                            ->label('Prekės')
+                            ->multiple()
+                            ->disabled()
+                            ->options(
+                                $record->products->pluck('name', 'id')->toArray()
+                            ),
+                    ])
+                    ->slideOver(), // <--- Drawer
+                EditAction::make(),
             ])
             ->bulkActions([
                 ForceDeleteBulkAction::make(),
