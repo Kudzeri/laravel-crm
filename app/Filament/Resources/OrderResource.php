@@ -28,7 +28,7 @@ class OrderResource extends Resource
         return $form
             ->schema([
                 TextInput::make('car_number')->label('Mašinos numeris')->required(),
-                TSelect::make('status')
+                Select::make('status')
                     ->label('Statusas')
                     ->required()
                     ->default('awaiting_payment')
