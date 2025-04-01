@@ -28,10 +28,16 @@ class OrderResource extends Resource
         return $form
             ->schema([
                 TextInput::make('car_number')->label('Mašinos numeris')->required(),
-                TextInput::make('status')
+                TSelect::make('status')
                     ->label('Statusas')
                     ->required()
-                    ->default('awaiting_payment'),
+                    ->default('awaiting_payment')
+                    ->options([
+                        'awaiting_payment' => 'Laukia apmokėjimo',
+                        'awaiting_shipment' => 'Laukia išsiuntimo',
+                        'shipped' => 'Išsiųstas',
+                        'completed' => 'Įvykdytas',
+                    ]),
                 Forms\Components\FileUpload::make('image')->label('Vaizdas')->image(),
 
                 Repeater::make('products')
