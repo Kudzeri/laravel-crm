@@ -4,11 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
 use App\Models\Order;
+use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class OrderResource extends Resource
 {
@@ -22,11 +27,63 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('car_number')->label('Mašinos numeris')->required(),
-                Forms\Components\TextInput::make('total_price')->label('Bendra kaina')->numeric()->required(),
-                Forms\Components\TextInput::make('status')->label('Statusas')->required(),
+                TextInput::make('car_number')->label('Mašinos numeris')->required(),
+                TextInput::make('status')
+                    ->label('Statusas')
+                    ->required()
+                    ->default('awaiting_payment'),
                 Forms\Components\FileUpload::make('image')->label('Vaizdas')->image(),
-            ]);
+
+                Repeater::make('products')
+                    ->label('Prekės')
+                    ->relationship()
+                    ->schema([
+                        Select::make('product_id')
+                            ->label('Prekė')
+                            ->options(Product::all()->pluck('name', 'id'))
+                            ->searchable()
+                            ->required()
+                            ->reactive(),
+                        TextInput::make('quantity')
+                            ->label('Kiekis')
+                            ->numeric()
+                            ->default(1)
+                            ->minValue(1)
+                            ->required(),
+                    ])
+                    ->columns(2)
+                    ->required(),
+
+                TextInput::make('total_price')
+                    ->label('Bendra kaina')
+                    ->disabled()
+                    ->dehydrated(), // сохраняем в БД
+            ])
+            ->columns(1)
+            ->statePath('data')
+            ->afterStateHydrated(function ($form, $state) {
+                // Автозаполнить цену
+                $form->fill([
+                    'total_price' => self::calculateTotal($state['products'] ?? [])
+                ]);
+            })
+            ->afterStateUpdated(function ($form, $state) {
+                // Перерасчёт при изменении товаров/количества
+                $form->fill([
+                    'total_price' => self::calculateTotal($state['products'] ?? [])
+                ]);
+            });
+    }
+
+    public static function calculateTotal(array $products): float
+    {
+        $ids = collect($products)->pluck('product_id')->unique();
+        $prices = Product::whereIn('id', $ids)->pluck('price', 'id');
+
+        return collect($products)->reduce(function ($carry, $item) use ($prices) {
+            $price = $prices[$item['product_id']] ?? 0;
+            return $carry + ($price * ($item['quantity'] ?? 1));
+        }, 0);
     }
 
     public static function table(Table $table): Table
@@ -34,22 +91,20 @@ class OrderResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('id')->label('ID')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('car_number')->label('Mašinos numeris')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('car_number')->label('Mašinos numeris')->sortable(),
                 Tables\Columns\TextColumn::make('total_price')->label('Bendra kaina')->sortable(),
-                Forms\Components\Select::make('status')
+                Tables\Columns\TextColumn::make('status')
                     ->label('Statusas')
-                    ->required()
-                    ->options([
+                    ->formatStateUsing(fn ($state) => match ($state) {
                         'awaiting_payment' => 'Laukia apmokėjimo',
                         'awaiting_shipment' => 'Laukia išsiuntimo',
                         'shipped' => 'Išsiųstas',
                         'completed' => 'Įvykdytas',
-                    ])
-            ->sortable(),
+                        default => $state,
+                    }),
                 Tables\Columns\ImageColumn::make('image')->label('Vaizdas'),
-                Tables\Columns\TextColumn::make('created_at')->label('Sukūrimo data')->dateTime()->sortable(),
-            ])
-            ->filters([]);
+                Tables\Columns\TextColumn::make('created_at')->label('Sukurta')->dateTime()->sortable(),
+            ]);
     }
 
     public static function getPages(): array
