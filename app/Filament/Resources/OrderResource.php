@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Actions\ForceDeleteBulkAction;
 use Filament\Tables\Table;
 use Illuminate\Support\Collection;
 
@@ -38,7 +39,12 @@ class OrderResource extends Resource
                         'shipped' => 'Išsiųstas',
                         'completed' => 'Įvykdytas',
                     ]),
-                Forms\Components\FileUpload::make('image')->label('Vaizdas')->image(),
+                Forms\Components\FileUpload::make('image')
+                    ->label('Vaizdas')
+                    ->image()
+                    ->directory('orders')
+                    ->preserveFilenames()
+                    ->required(),
 
                 Repeater::make('products')
                     ->label('Prekės')
@@ -108,6 +114,9 @@ class OrderResource extends Resource
                     }),
                 Tables\Columns\ImageColumn::make('image')->label('Vaizdas'),
                 Tables\Columns\TextColumn::make('created_at')->label('Sukurta')->dateTime()->sortable(),
+            ])
+            ->bulkActions([
+                ForceDeleteBulkAction::make(),
             ]);
     }
 
