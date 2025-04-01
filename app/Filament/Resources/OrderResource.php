@@ -42,7 +42,6 @@ class OrderResource extends Resource
 
                 Repeater::make('products')
                     ->label('Prekės')
-                    ->relationship()
                     ->schema([
                         Select::make('product_id')
                             ->label('Prekė')
@@ -66,7 +65,8 @@ class OrderResource extends Resource
                     ->afterStateHydrated(function (callable $set, $state) {
                         $total = OrderResource::calculateTotal($state);
                         $set('total_price', $total);
-                    }),
+                    })
+                    ->default([]), // чтобы не было null
 
 
                 TextInput::make('total_price')
