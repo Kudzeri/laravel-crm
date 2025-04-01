@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\OrderResource\Widgets\OrdersStats;
 use App\Filament\Widgets\MetalPricesChart;
 use Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin;
 use App\Filament\Resources\ProductResource\Widgets\ProductsByCategoryChart;
@@ -45,6 +46,7 @@ class AdminPanelProvider extends PanelProvider
                 ProductsByCategoryChart::class,
                 ProductsCountStats::class,
                 MetalPricesChart::class,
+                OrdersStats::class,
             ])
             ->plugins([
                 FilamentApexChartsPlugin::make(),
