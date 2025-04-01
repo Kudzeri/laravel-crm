@@ -29,5 +29,13 @@ class Product extends Model
     {
         return $this->hasMany(ProductAttribute::class);
     }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class)
+            ->withPivot('quantity')
+            ->withTimestamps();
+    }
+
 }
 
