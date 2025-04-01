@@ -51,7 +51,7 @@ class ProductImageResource extends Resource
         return $table->columns([
             ImageColumn::make('image_url')
                 ->label('Nuotrauka')
-                ->getStateUsing(fn ($record) => asset($record->image_url)),
+                ->getStateUsing(fn ($record) => asset(collect($record->image_url_array)->first())),
             TextColumn::make('product.name')->label('Prekė')->searchable(),
             TextColumn::make('alt')->label('ALT')->searchable(),
         ])

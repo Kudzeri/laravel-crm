@@ -28,14 +28,14 @@ class ProductImage extends Model
         });
     }
 
-    public function getImageUrlAttribute($value): string
+    public function getImageUrlArrayAttribute(): array
     {
-        return config('app.url') . '/' . ltrim($value, '/');
+        return json_decode($this->image_url, true) ?? [];
     }
 
     public function getThumbnailAttribute($value): ?string
     {
-        return $value ? config('app.url') . '/' . ltrim($value, '/') : null;
+        return json_decode($this->thumbnail, true) ?? [];
     }
 
 }
