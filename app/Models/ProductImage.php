@@ -28,7 +28,7 @@ class ProductImage extends Model
         });
     }
 
-    public function getSrcAttribute($value): string
+    public function getImageUrlAttribute($value): string
     {
         return config('app.url') . '/' . ltrim($value, '/');
     }

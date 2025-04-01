@@ -20,4 +20,9 @@ class Order extends Model
             ->withPivot('quantity')
             ->withTimestamps();
     }
+
+    public function getImageAttribute($value): string
+    {
+        return config('app.url') . '/' . ltrim($value, '/');
+    }
 }
