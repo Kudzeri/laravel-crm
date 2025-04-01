@@ -151,13 +151,26 @@ class OrderResource extends Resource
                             ->default($record->total_price)
                             ->disabled(),
 
-                        Select::make('products')
+                        Repeater::make('products')
                             ->label('Prekės')
-                            ->multiple()
+                            ->schema([
+                                TextInput::make('product_name')
+                                    ->label('Prekė')
+                                    ->disabled(),
+                                TextInput::make('quantity')
+                                    ->label('Kiekis')
+                                    ->disabled(),
+                            ])
+                            ->default(function (Order $record) {
+                                return $record->products->map(function ($product) {
+                                    return [
+                                        'product_name' => $product->name,
+                                        'quantity' => $product->pivot->quantity,
+                                    ];
+                                })->toArray();
+                            })
                             ->disabled()
-                            ->options(
-                                $record->products->pluck('name', 'id')->toArray()
-                            ),
+                            ->columns(2),
                     ])
                     ->slideOver(), // <--- Drawer
                 EditAction::make(),
